@@ -1,22 +1,28 @@
+import random
+import string
 import aiofiles
 
 import csv
 from aiocsv import AsyncDictReader
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from cars_app.database.crud.car import CarCRUD
 
 from cars_app.database.crud.location import LocationCRUD
-from cars_app.database.models import Location
-from cars_app.validation.schemas import LocationCreate
+from cars_app.database.models import Car, Location
+from cars_app.validation.schemas import CarCreate, LocationCreate
 
 
 class HelperService:
-    def __init__(self, location_crud: LocationCRUD) -> None:
+    def __init__(self, location_crud: LocationCRUD, car_crud: CarCRUD) -> None:
         self.location_crud = location_crud
+        self.car_crud = car_crud
 
     async def populate_locations(self):
-        if not await self._is_populated_with_locations():
-            locations_list = await self.read_from_source()
+        if await self._is_populated_with_locations():
+            print('Локации уже загружены в БД.')
+        else:
+            locations_list = await self._read_locations_from_source()
             for location in locations_list:
                 location_data = LocationCreate(
                     city=location['city'],
@@ -27,17 +33,58 @@ class HelperService:
                 )
                 await self.location_crud.create(location_data)
 
-    async def _is_populated_with_locations(self) -> Location | None:
-        return await self.location_crud.read_first()
+    async def populate_cars(self):
+        if await self._is_populated_with_cars():
+            print('Машины уже загружены в БД.')
+        else:
+            cars_list = await self._generate_cars()
+            for car in cars_list:
+                await self.car_crud.create(car)
 
-    async def read_from_source(self):
+    async def _read_locations_from_source(self):
         locations_list = []
         async with aiofiles.open('uszips.csv', mode='r', encoding='utf-8', newline='') as file:
             async for row in AsyncDictReader(file, quoting=csv.QUOTE_ALL):
                 locations_list.append(row)
         return locations_list
 
+    async def _generate_cars(self):
+        cars = []
+        number_plates = self._get_number_plates()
+        zips = await self._get_location_zips()
+        for i in range(20):
+            car = CarCreate(
+                number_plate=number_plates[i],
+                current_location=zips[i],
+                capacity=random.randint(1, 1000),
+            )
+            cars.append(car)
+        return cars
+
+    def _get_number_plates(self) -> list:
+        number_plates = set()
+        while len(number_plates) < 20:
+            number = random.randint(1000, 9999)
+            letter = random.choice(string.ascii_uppercase)
+            number_plates.add(f'{number}{letter}')
+        return list(number_plates)
+
+    async def _get_location_zips(self) -> list:
+        zips = []
+        locations_list = await self._read_locations_from_source()
+        while len(zips) < 20:
+            random_location = random.choice(locations_list)
+            zips.append(random_location['zip'])
+        return zips
+
+    async def _is_populated_with_locations(self) -> Location | None:
+        return await self.location_crud.read_first()
+
+    async def _is_populated_with_cars(self) -> Car | None:
+        return await self.car_crud.read_first()
+
 
 def get_helper_service(session: AsyncSession):
     location_crud = LocationCRUD(session)
-    return HelperService(location_crud)
+    car_crud = CarCRUD(session)
+    return HelperService(location_crud, car_crud)
