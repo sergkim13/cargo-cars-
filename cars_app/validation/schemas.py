@@ -1,5 +1,18 @@
 import re
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
+
+
+# Location
+class LocationDetail(BaseModel):
+    city: str
+    state: str
+    zip_code: int
+    latitude: float
+    longtitude: float
+
+
+class LocationCreate(LocationDetail):
+    pass
 
 
 # Car
@@ -14,23 +27,39 @@ class CarPlate(BaseModel):
 
 
 class CarUpdate(BaseModel):
-    current_location: str
+    current_location: int
+
+
+class CarCreate(CarPlate):
+    current_location: int
+    capacity: int = Field(ge=1, le=1000)
 
 
 # Cargo
 class CargoBase(BaseModel):
-    pickup_location: str
-    delivery_location: str
+    pickup_location: int
+    delivery_location: int
 
 
 class CargoCreate(CargoBase):
-    weight: int
+    weight: int = Field(ge=1, le=1000)
     description: str
 
 
+class CargoInfo(BaseModel):
+    id: int
+    pickup_location: int
+    delivery_location: int
+    weight: int = Field(ge=1, le=1000)
+    description: str
+
+    class Config:
+        orm_mode = True
+
+
 class CargoUpdate(BaseModel):
-    weight: int | None
-    description: str | None
+    weight: int = Field(ge=1, le=1000)
+    description: str
 
 
 class CargoListElement(CargoBase):
@@ -41,14 +70,15 @@ class CargoList(BaseModel):
     cargos: list[CargoListElement]
 
 
-class CargoDetail(CargoCreate):
+class CargoInfoDetail(CargoCreate):
     cars: list[CarPlate]
 
 
-# Location
-class LocationCreate(BaseModel):
-    city: str
-    state: str
-    zip_code: int
-    latitude: float
-    longtitude: float
+# Errors
+class CodelessErrorResponseModel(BaseModel):
+    message: str
+
+
+class ErrorResponseModel(BaseModel):
+    code: int
+    message: str
