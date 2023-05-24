@@ -2,7 +2,7 @@ install:
 	poetry install
 
 dev:
-	poetry run uvicorn users_app.main:app --reload
+	poetry run uvicorn cars_app.main:app --reload
 
 hooks:
 	poetry run pre-commit run --all-files
@@ -11,7 +11,7 @@ test:
 	poetry run pytest -vv
 
 test-cov:
-	poetry run pytest --cov-report term-missing --cov=users_app --cov-report xml
+	poetry run pytest --cov-report term-missing --cov=cars_app --cov-report xml
 
 compose:
 	docker compose up -d
