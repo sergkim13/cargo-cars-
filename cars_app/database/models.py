@@ -9,16 +9,12 @@ class Base(DeclarativeBase):
 class Location(Base):
     __tablename__ = 'location'
 
-    zip_code: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    zip_code: Mapped[int] = mapped_column(Integer, primary_key=True)
     city: Mapped[str] = mapped_column(String(32))
     state: Mapped[str] = mapped_column(String(32))
     latitude: Mapped[float] = mapped_column(Float)
     longtitude: Mapped[float] = mapped_column(Float)
 
-    cargo_relation: Mapped[list['Cargo']] = relationship(
-        back_populates='location_relation',
-        cascade='all, delete-orphan',
-    )
     car_relation: Mapped[list['Car']] = relationship(
         back_populates='location_relation',
         cascade='all, delete-orphan',
@@ -41,8 +37,11 @@ class Cargo(Base):
     weight: Mapped[int] = mapped_column(Integer)
     description: Mapped[str] = mapped_column(String(512))
 
-    location_relation: Mapped['Location'] = relationship(
-        back_populates='cargo_relation',
+    pickup_location_relation: Mapped['Location'] = relationship(
+        foreign_keys=[pickup_location],
+    )
+    delivery_location_relation: Mapped['Location'] = relationship(
+        foreign_keys=[delivery_location],
     )
 
     def __repr__(self) -> str:
