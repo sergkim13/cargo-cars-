@@ -2,7 +2,7 @@ import csv
 import random
 import string
 
-import aiofiles
+import aiofiles  # type: ignore
 from aiocsv import AsyncDictReader
 from sqlalchemy.ext.asyncio import AsyncSession
 
