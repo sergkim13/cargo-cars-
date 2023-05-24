@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, String, Float, BigInteger, Integer, CheckConstraint
+from sqlalchemy import CheckConstraint, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 

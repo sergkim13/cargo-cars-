@@ -2,10 +2,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cars_app.database.models import Cargo
-from cars_app.validation.schemas import (
-    CargoCreate,
-    CargoUpdate,
-)
+from cars_app.validation.schemas import CargoCreate, CargoUpdate
 
 
 class CargoCRUD:
@@ -44,7 +41,7 @@ class CargoCRUD:
             Cargo.delivery_location,
             Cargo.weight,
             Cargo.description,
-            )
+        )
         result = await self.session.execute(stmt)
         return result.fetchone()
 

@@ -1,4 +1,5 @@
 import re
+
 from pydantic import BaseModel, Field, validator
 
 
@@ -64,10 +65,6 @@ class CargoUpdate(BaseModel):
 
 class CargoListElement(CargoBase):
     cars_count: int
-
-
-class CargoList(BaseModel):
-    cargos: list[CargoListElement]
 
 
 class CargoInfoDetail(CargoCreate):

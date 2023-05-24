@@ -5,10 +5,14 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cars_app.database.crud.cargo import CargoCRUD
-from cars_app.database.models import Cargo
 from cars_app.database.settings import get_session
 from cars_app.exceptions.constants import MSG_CARGO_NOT_FOUND, MSG_LOCATION_NOT_FOUND
-from cars_app.validation.schemas import CargoCreate, CargoInfo, CargoInfoDetail, CargoList, CargoUpdate
+from cars_app.validation.schemas import (
+    CargoCreate,
+    CargoInfo,
+    CargoInfoDetail,
+    CargoUpdate,
+)
 
 
 class CargoService:
@@ -19,11 +23,11 @@ class CargoService:
         """Init `CargoService` instance."""
         self.cargo_crud = cargo_crud
 
-    async def get_list(self) -> CargoList:
+    async def get_list(self) -> list[CargoInfo] | None:
         """Gets list of cargos and returns serialized response."""
         cargos = await self.cargo_crud.read_all()
         return cargos
-    
+
     async def get_detail(self, cargo_id: int) -> CargoInfoDetail:
         """Gets info about specific cargo."""
         try:

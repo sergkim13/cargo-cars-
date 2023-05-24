@@ -1,7 +1,8 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
+
 from cars_app.api.v1.routers.cargo import router
-from cars_app.services.helper import HelperService, get_helper_service
 from cars_app.database.settings import async_session
+from cars_app.services.helper import get_helper_service
 
 app = FastAPI(
     title='Cars API',

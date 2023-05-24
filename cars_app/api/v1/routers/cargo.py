@@ -1,23 +1,17 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
 
 from cars_app.api.v1.routers.constants import (
-    CARGO_PREFIX,
     CARGO_CREATE,
+    CARGO_DELETE,
     CARGO_DETAIL,
     CARGO_LIST,
+    CARGO_PREFIX,
     CARGO_UPDATE,
-    CARGO_DELETE,
 )
 from cars_app.services.cargo import CargoService, get_cargo_service
-from cars_app.validation.schemas import (
-    CargoInfo,
-    CargoCreate,
-    CargoList,
-    CargoUpdate,
-)
+from cars_app.validation.schemas import CargoCreate, CargoInfo, CargoUpdate
 
 router = APIRouter(
     prefix=CARGO_PREFIX,
@@ -32,7 +26,7 @@ router = APIRouter(
     summary='Получение списка всех грузов',
     # responses=E400_401_403,
 )
-async def cargo_list(cargo_service: CargoService = Depends(get_cargo_service)) -> list[CargoInfo]:
+async def cargo_list(cargo_service: CargoService = Depends(get_cargo_service)) -> list[CargoInfo] | None:
     """Shows cargo's info list."""
     return await cargo_service.get_list()
 

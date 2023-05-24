@@ -1,13 +1,12 @@
+import csv
 import random
 import string
+
 import aiofiles
-
-import csv
 from aiocsv import AsyncDictReader
-
 from sqlalchemy.ext.asyncio import AsyncSession
-from cars_app.database.crud.car import CarCRUD
 
+from cars_app.database.crud.car import CarCRUD
 from cars_app.database.crud.location import LocationCRUD
 from cars_app.database.models import Car, Location
 from cars_app.validation.schemas import CarCreate, LocationCreate
@@ -62,7 +61,7 @@ class HelperService:
         return cars
 
     def _get_number_plates(self) -> list:
-        number_plates = set()
+        number_plates: set[str] = set()
         while len(number_plates) < 20:
             number = random.randint(1000, 9999)
             letter = random.choice(string.ascii_uppercase)
@@ -70,7 +69,7 @@ class HelperService:
         return list(number_plates)
 
     async def _get_location_zips(self) -> list:
-        zips = []
+        zips: list[int] = []
         locations_list = await self._read_locations_from_source()
         while len(zips) < 20:
             random_location = random.choice(locations_list)
