@@ -157,6 +157,34 @@ docs = ["furo (>=2023.3.27)", "sphinx (>=6.1.3)", "sphinx-autodoc-typehints (>=1
 testing = ["covdefaults (>=2.3)", "coverage (>=7.2.3)", "diff-cover (>=7.5)", "pytest (>=7.3.1)", "pytest-cov (>=4)", "pytest-mock (>=3.10)", "pytest-timeout (>=2.1)"]
 
 [[package]]
+name = "geographiclib"
+version = "2.0"
+description = "The geodesic routines from GeographicLib"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
+name = "geopy"
+version = "2.3.0"
+description = "Python Geocoding Toolbox"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+geographiclib = ">=1.52,<3"
+
+[package.extras]
+aiohttp = ["aiohttp"]
+dev = ["coverage", "flake8 (>=5.0,<5.1)", "isort (>=5.10.0,<5.11.0)", "pytest (>=3.10)", "pytest-asyncio (>=0.17)", "readme-renderer", "sphinx (<=4.3.2)", "sphinx-issues", "sphinx-rtd-theme (>=0.5.0)"]
+dev-docs = ["readme-renderer", "sphinx (<=4.3.2)", "sphinx-issues", "sphinx-rtd-theme (>=0.5.0)"]
+dev-lint = ["flake8 (>=5.0,<5.1)", "isort (>=5.10.0,<5.11.0)"]
+dev-test = ["coverage", "pytest (>=3.10)", "pytest-asyncio (>=0.17)", "sphinx (<=4.3.2)"]
+requests = ["requests (>=2.16.2)", "urllib3 (>=1.24.2)"]
+timezone = ["pytz"]
+
+[[package]]
 name = "greenlet"
 version = "2.0.2"
 description = "Lightweight in-process concurrent programming"
@@ -467,7 +495,7 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.3)", "coverage-enable-subprocess
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "f49dfa732432285266f77bc97f5328f133b86e715e162a0813785d6efad84c83"
+content-hash = "4bfb8b4a1bb6847853016174e18a4a9de16f783d94d05af69bc73f3846ea1af5"
 
 [metadata.files]
 aiocsv = [
@@ -582,6 +610,14 @@ fastapi = [
 filelock = [
     {file = "filelock-3.12.0-py3-none-any.whl", hash = "sha256:ad98852315c2ab702aeb628412cbf7e95b7ce8c3bf9565670b4eaecf1db370a9"},
     {file = "filelock-3.12.0.tar.gz", hash = "sha256:fc03ae43288c013d2ea83c8597001b1129db351aad9c57fe2409327916b8e718"},
+]
+geographiclib = [
+    {file = "geographiclib-2.0-py3-none-any.whl", hash = "sha256:6b7225248e45ff7edcee32becc4e0a1504c606ac5ee163a5656d482e0cd38734"},
+    {file = "geographiclib-2.0.tar.gz", hash = "sha256:f7f41c85dc3e1c2d3d935ec86660dc3b2c848c83e17f9a9e51ba9d5146a15859"},
+]
+geopy = [
+    {file = "geopy-2.3.0-py3-none-any.whl", hash = "sha256:4a29a16d41d8e56ba8e07310802a1cbdf098eeb6069cc3d6d3068fc770629ffc"},
+    {file = "geopy-2.3.0.tar.gz", hash = "sha256:228cd53b6eef699b2289d1172e462a90d5057779a10388a7366291812601187f"},
 ]
 greenlet = [
     {file = "greenlet-2.0.2-cp27-cp27m-macosx_10_14_x86_64.whl", hash = "sha256:bdfea8c661e80d3c1c99ad7c3ff74e6e87184895bbaca6ee8cc61209f8b9b85d"},

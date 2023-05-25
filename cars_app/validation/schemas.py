@@ -41,6 +41,9 @@ class CargoBase(BaseModel):
     pickup_location: int
     delivery_location: int
 
+    class Config:
+        orm_mode = True
+
 
 class CargoCreate(CargoBase):
     weight: int = Field(ge=1, le=1000)
@@ -64,11 +67,22 @@ class CargoUpdate(BaseModel):
 
 
 class CargoListElement(CargoBase):
-    cars_count: int
+    nearby_cars_count: int
+
+    class Config:
+        orm_mode = True
 
 
-class CargoInfoDetail(CargoCreate):
-    cars: list[CarPlate]
+class CargoCarsInfo(CarPlate):
+    distance_to_cargo: float
+
+    @validator('distance_to_cargo')
+    def round_distance(cls, v):
+        return round(v, 2)
+
+
+class CargoInfoDetail(CargoInfo):
+    cars_info: list[CargoCarsInfo]
 
 
 # Errors

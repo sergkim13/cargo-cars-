@@ -1,4 +1,6 @@
+from geopy.distance import distance
 from sqlalchemy import CheckConstraint, Float, ForeignKey, Integer, String
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -18,6 +20,7 @@ class Location(Base):
     car_relation: Mapped[list['Car']] = relationship(
         back_populates='location_relation',
         cascade='all, delete-orphan',
+        lazy='joined',
     )
 
     def __repr__(self) -> str:
@@ -63,6 +66,13 @@ class Car(Base):
     location_relation: Mapped['Location'] = relationship(
         back_populates='car_relation',
     )
+
+    @hybrid_property
+    def distance_to_cargo(self, cargo: Cargo):
+        car_coordinates = (self.location_relation.latitude, self.location_relation.longtitude)
+        cargo_coordinates = (cargo.pickup_location_relation.latitude,
+                             cargo.pickup_location_relation.longtitude)
+        return distance(car_coordinates, cargo_coordinates).miles
 
     def __repr__(self) -> str:
         return f'Car(id={self.id!r})'

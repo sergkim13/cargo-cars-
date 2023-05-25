@@ -11,7 +11,13 @@ from cars_app.api.v1.routers.constants import (
     CARGO_UPDATE,
 )
 from cars_app.services.cargo import CargoService, get_cargo_service
-from cars_app.validation.schemas import CargoCreate, CargoInfo, CargoUpdate
+from cars_app.validation.schemas import (
+    CargoCreate,
+    CargoInfo,
+    CargoInfoDetail,
+    CargoListElement,
+    CargoUpdate,
+)
 
 router = APIRouter(
     prefix=CARGO_PREFIX,
@@ -22,11 +28,10 @@ router = APIRouter(
 @router.get(
     path=CARGO_LIST,
     status_code=HTTPStatus.OK,
-    response_model=list[CargoInfo],
+    response_model=list[CargoListElement],
     summary='Получение списка всех грузов',
-    # responses=E400_401_403,
 )
-async def cargo_list(cargo_service: CargoService = Depends(get_cargo_service)) -> list[CargoInfo] | None:
+async def cargo_list(cargo_service: CargoService = Depends(get_cargo_service)) -> list[CargoListElement] | None:
     """Shows cargo's info list."""
     return await cargo_service.get_list()
 
@@ -34,13 +39,13 @@ async def cargo_list(cargo_service: CargoService = Depends(get_cargo_service)) -
 @router.get(
     path=CARGO_DETAIL,
     status_code=HTTPStatus.OK,
-    response_model=CargoInfo,  # дополнить
+    response_model=CargoInfoDetail,
     summary='Получение информации о грузе',
 )
 async def cargo_detail(
     cargo_id: int,
     cargo_service: CargoService = Depends(get_cargo_service),
-) -> CargoInfo:
+) -> CargoInfoDetail:
     return await cargo_service.get_detail(cargo_id)
 
 
