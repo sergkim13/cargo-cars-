@@ -3,11 +3,11 @@ from http import HTTPStatus
 import pytest
 
 from cars_app.api.v1.routers.constants import (
-    CARGO_LIST_FULL,
     CARGO_CREATE_FULL,
-    CARGO_DETAIL_FULL,
-    CARGO_UPDATE_FULL,
     CARGO_DELETE_FULL,
+    CARGO_DETAIL_FULL,
+    CARGO_LIST_FULL,
+    CARGO_UPDATE_FULL,
 )
 from cars_app.validation.schemas import (
     CargoCarsInfo,
@@ -40,19 +40,19 @@ async def test_get_list(client, fixture_cargo_1, fixture_cargo_2, fixture_cargo_
         pickup_location=fixture_cargo_1.pickup_location,
         delivery_location=fixture_cargo_1.delivery_location,
         nearby_cars_count=2,
-        ).dict()
+    ).dict()
     assert response.json()[1] == CargoListElement(
         id=fixture_cargo_2.id,
         pickup_location=fixture_cargo_2.pickup_location,
         delivery_location=fixture_cargo_2.delivery_location,
         nearby_cars_count=2,
-        ).dict()
+    ).dict()
     assert response.json()[2] == CargoListElement(
         id=fixture_cargo_3.id,
         pickup_location=fixture_cargo_3.pickup_location,
         delivery_location=fixture_cargo_3.delivery_location,
         nearby_cars_count=2,
-        ).dict()
+    ).dict()
 
 
 @pytest.mark.asyncio

@@ -1,8 +1,8 @@
 import pytest
 import pytest_asyncio
-from cars_app.database.crud.car import CarCRUD
 
-from cars_app.validation.schemas import CarCreate
+from cars_app.database.crud.car import CarCRUD
+from cars_app.validation.schemas import CarCreate, CarUpdate
 
 
 @pytest.fixture
@@ -48,3 +48,8 @@ async def fixture_car_2(session, car_data_2, fixture_location_2):
 async def fixture_car_3(session, car_data_3, fixture_location_3):
     car_crud = CarCRUD(session)
     return await car_crud.create(car_data_3)
+
+
+@pytest.fixture
+def car_update_data(location_data_3):
+    return CarUpdate(current_location=location_data_3.zip_code)

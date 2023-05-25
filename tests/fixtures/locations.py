@@ -1,7 +1,7 @@
 import pytest
 import pytest_asyncio
-from cars_app.database.crud.location import LocationCRUD
 
+from cars_app.database.crud.location import LocationCRUD
 from cars_app.validation.schemas import LocationCreate
 
 

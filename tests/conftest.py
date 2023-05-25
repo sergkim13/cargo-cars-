@@ -5,11 +5,11 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy_utils import create_database, database_exists
 
-from config import DB_HOST, DB_PASS, DB_PORT, DB_USER, TEST_DB_NAME
 from cars_app.cache.settings import redis_client
 from cars_app.database.models import Base
 from cars_app.database.settings import get_session
 from cars_app.main import app
+from config import DB_HOST, DB_PASS, DB_PORT, DB_USER, TEST_DB_NAME
 
 pytest_plugins = [
     'tests.fixtures.cargos',
