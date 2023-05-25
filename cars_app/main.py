@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
-from cars_app.api.v1.routers.cargo import router
+from cars_app.api.v1.routers.car import router as car_router
+from cars_app.api.v1.routers.cargo import router as cargo_router
 from cars_app.database.settings import async_session
 from cars_app.services.helper import get_helper_service
 
@@ -11,7 +12,8 @@ app = FastAPI(
     docs_url='/docs',
     redoc_url='/redoc',
 )
-app.include_router(router)
+app.include_router(cargo_router)
+app.include_router(car_router)
 
 
 async def populate_db():

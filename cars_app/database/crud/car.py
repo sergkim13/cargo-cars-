@@ -1,8 +1,8 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cars_app.database.models import Car, Cargo
-from cars_app.validation.schemas import CarCreate
+from cars_app.validation.schemas import CarCreate, CarUpdate
 
 
 class CarCRUD:
@@ -27,6 +27,13 @@ class CarCRUD:
         car = Car(**data.dict())
         self.session.add(car)
         await self.session.commit()
+
+    async def update(self, car_id: int, data: CarUpdate) -> Car:
+        """Update specific car."""
+        values = data.dict(exclude_unset=True)
+        stmt = update(Car).where(Car.id == car_id).values(**values).returning(Car)
+        result = await self.session.execute(stmt)
+        return result.scalar_one()
 
     async def get_car_location_coordinates(self, car: Car) -> tuple[float]:
         """Returns car's current locations coordinates."""

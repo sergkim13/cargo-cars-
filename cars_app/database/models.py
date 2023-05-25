@@ -59,7 +59,8 @@ class Car(Base):
         CheckConstraint("number_plate ~ '^[1-9][0-9]{3}[A-Z]$'", name='check_number_plate_pattern'),
     )
 
-    number_plate: Mapped[str] = mapped_column(String(32), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    number_plate: Mapped[str] = mapped_column(String(32), unique=True)
     current_location: Mapped[int] = mapped_column(ForeignKey('location.zip_code'))
     capacity: Mapped[int] = mapped_column(Integer)
 

@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: a20e0399da24
+Revision ID: 7564a17fd996
 Revises: 
-Create Date: 2023-05-24 13:07:30.471696
+Create Date: 2023-05-25 13:43:28.977449
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a20e0399da24'
+revision = '7564a17fd996'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,6 +27,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('zip_code')
     )
     op.create_table('car',
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('number_plate', sa.String(length=32), nullable=False),
     sa.Column('current_location', sa.Integer(), nullable=False),
     sa.Column('capacity', sa.Integer(), nullable=False),
@@ -34,7 +35,8 @@ def upgrade() -> None:
     sa.CheckConstraint('capacity <= 1000', name='check_capacity_max'),
     sa.CheckConstraint('capacity >= 1', name='check_capacity_min'),
     sa.ForeignKeyConstraint(['current_location'], ['location.zip_code'], ),
-    sa.PrimaryKeyConstraint('number_plate')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('number_plate')
     )
     op.create_table('cargo',
     sa.Column('id', sa.Integer(), nullable=False),

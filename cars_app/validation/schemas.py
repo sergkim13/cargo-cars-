@@ -36,6 +36,22 @@ class CarCreate(CarPlate):
     capacity: int = Field(ge=1, le=1000)
 
 
+class CarInfo(BaseModel):
+    id: int
+    number_plate: str
+    current_location: int
+    capacity: int = Field(ge=1, le=1000)
+
+    @validator('number_plate')
+    def validate_number_plate(cls, v):
+        if not re.match('^[1-9][0-9]{3}[A-Z]$', v):
+            raise ValueError('Invalid number plate')
+        return v
+
+    class Config:
+        orm_mode = True
+
+
 # Cargo
 class CargoBase(BaseModel):
     pickup_location: int
@@ -66,7 +82,10 @@ class CargoUpdate(BaseModel):
     description: str
 
 
-class CargoListElement(CargoBase):
+class CargoListElement(BaseModel):
+    id: int
+    pickup_location: int
+    delivery_location: int
     nearby_cars_count: int
 
     class Config:
@@ -83,13 +102,3 @@ class CargoCarsInfo(CarPlate):
 
 class CargoInfoDetail(CargoInfo):
     cars_info: list[CargoCarsInfo]
-
-
-# Errors
-class CodelessErrorResponseModel(BaseModel):
-    message: str
-
-
-class ErrorResponseModel(BaseModel):
-    code: int
-    message: str

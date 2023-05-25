@@ -39,6 +39,7 @@ class CargoService:
         cargos = await self.cargo_crud.read_all()
         serialized_cargos = [
             CargoListElement(
+                id=cargo.id,
                 pickup_location=cargo.pickup_location,
                 delivery_location=cargo.delivery_location,
                 nearby_cars_count=await self._count_nearby_cars(cargo),
@@ -91,8 +92,8 @@ class CargoService:
     async def update(self, cargo_id: int, data: CargoUpdate) -> CargoInfo:
         """Update specific cargo."""
         try:
-            updated_user = await self.cargo_crud.update(cargo_id, data)
-            return updated_user
+            updated_cargo = await self.cargo_crud.update(cargo_id, data)
+            return updated_cargo
         except NoResultFound:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND,

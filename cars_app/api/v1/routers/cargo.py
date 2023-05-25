@@ -74,6 +74,7 @@ async def cargo_update(
     data: CargoUpdate,
     cargo_service: CargoService = Depends(get_cargo_service),
 ) -> CargoInfo:
+    """Updates specific cargo."""
     return await cargo_service.update(cargo_id, data)
 
 
