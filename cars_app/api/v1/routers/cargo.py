@@ -17,6 +17,7 @@ from cars_app.validation.schemas import (
     CargoInfoDetail,
     CargoListElement,
     CargoUpdate,
+    QueryParams,
 )
 
 router = APIRouter(
@@ -31,9 +32,12 @@ router = APIRouter(
     response_model=list[CargoListElement],
     summary='Получение списка всех грузов',
 )
-async def cargo_list(cargo_service: CargoService = Depends(get_cargo_service)) -> list[CargoListElement] | None:
+async def cargo_list(
+    query: QueryParams = Depends(),
+    cargo_service: CargoService = Depends(get_cargo_service)
+) -> list[CargoListElement] | None:
     """Shows cargo's info list."""
-    return await cargo_service.get_list()
+    return await cargo_service.get_list(query)
 
 
 @router.get(

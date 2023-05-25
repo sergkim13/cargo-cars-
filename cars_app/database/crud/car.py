@@ -35,6 +35,7 @@ class CarCRUD:
         values = data.dict(exclude_unset=True)
         stmt = update(Car).where(Car.id == car_id).values(**values).returning(Car)
         result = await self.session.execute(stmt)
+        await self.session.commit()
         return result.scalar_one()
 
     async def get_car_location_coordinates(self, car: Car) -> tuple[float]:

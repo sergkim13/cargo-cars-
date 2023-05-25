@@ -21,6 +21,7 @@ from cars_app.validation.schemas import (
     CargoInfoDetail,
     CargoListElement,
     CargoUpdate,
+    QueryParams,
 )
 
 
@@ -38,11 +39,12 @@ class CargoService:
         self.location_crud = location_crud
         self.cache = cache
 
-    async def get_list(self) -> list[CargoListElement]:
+    async def get_list(self, query: QueryParams) -> list[CargoListElement]:
         """Gets list of cargos and returns serialized response."""
-        serialized_cargos = await self.cache.get('cargo-all')
+        cache_key = f'cargo-{query}'
+        serialized_cargos = await self.cache.get(cache_key)
         if not serialized_cargos:
-            cargos = await self.cargo_crud.read_all()
+            cargos = await self.cargo_crud.read_all(query.weight_min, query.weight_max)
             serialized_cargos = [
                 CargoListElement(
                     id=cargo.id,
@@ -51,7 +53,7 @@ class CargoService:
                     nearby_cars_count=await self._count_nearby_cars(cargo),
                 ) for cargo in cargos
             ]
-            await self.cache.set('cargo-all', serialized_cargos)
+            await self.cache.set(cache_key, serialized_cargos)
 
         return serialized_cargos
 
@@ -89,7 +91,7 @@ class CargoService:
         """Creates new cargo."""
         try:
             cargo = await self.cargo_crud.create(data=data)
-            await self.cache.clear('cargo-all')
+            await self.cache.clear('all')
             return cargo
         except IntegrityError as e:
             if 'ForeignKeyViolationError' in str(e.orig):
@@ -105,7 +107,7 @@ class CargoService:
         try:
             updated_cargo = await self.cargo_crud.update(cargo_id, data)
             await self.cache.clear(f'cargo-{cargo_id}')
-            await self.cache.clear('cargo-all')
+            await self.cache.clear('all')
             return updated_cargo
         except NoResultFound:
             raise HTTPException(
@@ -118,7 +120,7 @@ class CargoService:
         try:
             await self.cargo_crud.delete(cargo_id)
             await self.cache.clear(f'cargo-{cargo_id}')
-            await self.cache.clear('cargo-all')
+            await self.cache.clear('all')
         except NoResultFound:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND,

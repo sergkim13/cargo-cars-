@@ -12,9 +12,9 @@ class CargoCRUD:
         """Init `CargoCRUD` instance with given session."""
         self.session = session
 
-    async def read_all(self) -> list[Cargo]:
+    async def read_all(self, weight_min: int = 1, weight_max: int = 1000) -> list[Cargo]:
         """Read all cargos."""
-        query = select(Cargo)
+        query = select(Cargo).where(Cargo.weight >= weight_min).where(Cargo.weight <= weight_max)
         result = await self.session.execute(query)
         return result.scalars().all()
 
@@ -50,6 +50,7 @@ class CargoCRUD:
             Cargo.description,
         )
         result = await self.session.execute(stmt)
+        await self.session.commit()
         return result.fetchone()
 
     async def delete(self, cargo_id: int):

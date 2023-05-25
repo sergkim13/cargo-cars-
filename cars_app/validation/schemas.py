@@ -1,5 +1,6 @@
 import re
 
+from fastapi import Query
 from pydantic import BaseModel, Field, validator
 
 
@@ -102,3 +103,17 @@ class CargoCarsInfo(CarPlate):
 
 class CargoInfoDetail(CargoInfo):
     cars_info: list[CargoCarsInfo]
+
+
+# Query
+class QueryParams(BaseModel):
+    weight_min: int = Query(default=1, ge=1, le=1000)
+    weight_max: int = Query(default=1000, ge=1, le=1000)
+    distance_min: int = Query(default=0, ge=0)
+    distance_max: int = Query(default=450, ge=0)
+
+    @validator('weight_max')
+    def validate_weight_max(cls, v, values):
+        if 'weight_min' in values and v < values['weight_min']:
+            raise ValueError('weight_max должен быть больше или равен weight_min')
+        return v
