@@ -9,6 +9,7 @@ services:
       REDIS_HOST: 'app_redis'
       DB_HOST: 'app_db'
       SQLALCHEMY_ECHO: ''
+      DEBUG: ''
     build:
       context: .
       dockerfile: Dockerfile

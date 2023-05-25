@@ -22,11 +22,13 @@ class CarCRUD:
         result = await self.session.execute(query)
         return result.first()
 
-    async def create(self, data: CarCreate) -> None:
+    async def create(self, data: CarCreate) -> Car:
         """Create car."""
         car = Car(**data.dict())
         self.session.add(car)
         await self.session.commit()
+        await self.session.refresh(car)
+        return car
 
     async def update(self, car_id: int, data: CarUpdate) -> Car:
         """Update specific car."""

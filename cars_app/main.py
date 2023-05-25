@@ -4,6 +4,7 @@ from cars_app.api.v1.routers.car import router as car_router
 from cars_app.api.v1.routers.cargo import router as cargo_router
 from cars_app.database.settings import async_session
 from cars_app.services.helper import get_helper_service
+from config import DEBUG
 
 app = FastAPI(
     title='Cars API',
@@ -25,4 +26,5 @@ async def populate_db():
 
 @app.on_event('startup')
 async def startup_event():
-    await populate_db()
+    if DEBUG is False:
+        await populate_db()

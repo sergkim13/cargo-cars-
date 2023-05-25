@@ -6,6 +6,7 @@ load_dotenv()
 
 # Security
 SECRET_KEY = os.environ.get('SECRET_KEY')
+DEBUG = bool(os.environ.get('DEBUG'))
 
 # Database
 DB_HOST = os.environ.get('DB_HOST')
