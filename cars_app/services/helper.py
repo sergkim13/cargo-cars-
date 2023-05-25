@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from cars_app.database.crud.car import CarCRUD
 from cars_app.database.crud.location import LocationCRUD
 from cars_app.database.models import Car, Location
+from cars_app.logging.module import logger
 from cars_app.validation.schemas import CarCreate, LocationCreate
 
 
@@ -18,9 +19,7 @@ class HelperService:
         self.car_crud = car_crud
 
     async def populate_locations(self):
-        if await self._is_populated_with_locations():
-            print('Локации уже загружены в БД.')
-        else:
+        if not await self._is_populated_with_locations():
             locations_list = await self._read_locations_from_source()
             for location in locations_list:
                 location_data = LocationCreate(
@@ -31,14 +30,14 @@ class HelperService:
                     longtitude=float(location['lng']),
                 )
                 await self.location_crud.create(location_data)
+        logger.info('Локации загружены в БД.')
 
     async def populate_cars(self):
-        if await self._is_populated_with_cars():
-            print('Машины уже загружены в БД.')
-        else:
+        if not await self._is_populated_with_cars():
             cars_list = await self._generate_cars()
             for car in cars_list:
                 await self.car_crud.create(car)
+        logger.info('Машины загружены в БД.')
 
     async def _read_locations_from_source(self):
         locations_list = []
