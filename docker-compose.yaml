@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  cars_app:
+    container_name: cars_app
+    env_file:
+      - .env
+    environment:
+      REDIS_HOST: 'app_redis'
+      DB_HOST: 'app_db'
+      SQLALCHEMY_ECHO: ''
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: >
+      sh -c "
+        echo 'Starting project...' &&
+        alembic upgrade head &&
+        uvicorn cars_app.main:app --host 0.0.0.0 --reload
+      "
+    networks:
+      - prod_network
+    expose:
+      - 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      app_db:
+        condition: service_healthy
+      app_redis:
+        condition: service_healthy
+
+
+  app_db:
+    container_name: app_db
+    image: postgres:15.1-alpine
+    volumes:
+      - psql:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    env_file:
+      - .env
+    expose:
+      - 5432
+    ports:
+      - '5432:5432'
+    networks:
+      - prod_network
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USER} -d ${DB_NAME}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app_redis:
+    container_name: app_redis
+    image: redis:latest
+    env_file:
+      - .env
+    expose:
+      - 6379
+    ports:
+      - '6379:6379'
+    networks:
+      - prod_network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  prod_network:
+    name: prod_network
+    driver: bridge
+
+volumes:
+  psql:
