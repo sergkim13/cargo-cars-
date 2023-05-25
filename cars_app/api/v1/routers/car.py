@@ -2,15 +2,9 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends
 
-from cars_app.api.v1.routers.constants import (
-    CAR_PREFIX,
-    CAR_UPDATE,
-)
+from cars_app.api.v1.routers.constants import CAR_PREFIX, CAR_UPDATE
 from cars_app.services.car import CarService, get_car_service
-from cars_app.validation.schemas import (
-    CarInfo,
-    CarUpdate,
-)
+from cars_app.validation.schemas import CarInfo, CarUpdate
 
 router = APIRouter(
     prefix=CAR_PREFIX,

@@ -5,6 +5,8 @@ from geopy.distance import distance
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from cars_app.cache.abstract_cache import AbstractCache
+from cars_app.cache.module import get_redis_cache
 from cars_app.database.crud.car import CarCRUD
 from cars_app.database.crud.cargo import CargoCRUD
 from cars_app.database.crud.location import LocationCRUD
@@ -28,57 +30,66 @@ class CargoService:
         cargo_crud: CargoCRUD,
         car_crud: CarCRUD,
         location_crud: LocationCRUD,
+        cache: AbstractCache,
     ) -> None:
         """Init `CargoService` instance."""
         self.cargo_crud = cargo_crud
         self.car_crud = car_crud
         self.location_crud = location_crud
+        self.cache = cache
 
     async def get_list(self) -> list[CargoListElement]:
         """Gets list of cargos and returns serialized response."""
-        cargos = await self.cargo_crud.read_all()
-        serialized_cargos = [
-            CargoListElement(
-                id=cargo.id,
-                pickup_location=cargo.pickup_location,
-                delivery_location=cargo.delivery_location,
-                nearby_cars_count=await self._count_nearby_cars(cargo),
-            ) for cargo in cargos
-        ]
+        serialized_cargos = await self.cache.get('cargo-all')
+        if not serialized_cargos:
+            cargos = await self.cargo_crud.read_all()
+            serialized_cargos = [
+                CargoListElement(
+                    id=cargo.id,
+                    pickup_location=cargo.pickup_location,
+                    delivery_location=cargo.delivery_location,
+                    nearby_cars_count=await self._count_nearby_cars(cargo),
+                ) for cargo in cargos
+            ]
+            await self.cache.set('cargo-all', serialized_cargos)
 
         return serialized_cargos
 
     async def get_detail(self, cargo_id: int) -> CargoInfoDetail:
         """Gets info about specific cargo."""
-        try:
-            cargo = await self.cargo_crud.read(cargo_id=cargo_id)
-            cars = await self.car_crud.read_all()
-            cars_info = [
-                CargoCarsInfo(
-                    number_plate=car.number_plate,
-                    distance_to_cargo=await self._count_distance(car, cargo),
-                ) for car in cars
-            ]
-            # await self.cache.set(cache_key, user)
-        except NoResultFound:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=MSG_CARGO_NOT_FOUND,
-            )
-        return CargoInfoDetail(
-            id=cargo.id,
-            pickup_location=cargo.pickup_location,
-            delivery_location=cargo.delivery_location,
-            weight=cargo.weight,
-            description=cargo.description,
-            cars_info=cars_info,
-        )
+        cache_key = f'cargo-{cargo_id}'
+        cargo_detail = await self.cache.get(cache_key)
+        if not cargo_detail:
+            try:
+                cargo = await self.cargo_crud.read(cargo_id=cargo_id)
+                cars = await self.car_crud.read_all()
+                cars_info = [
+                    CargoCarsInfo(
+                        number_plate=car.number_plate,
+                        distance_to_cargo=await self._count_distance(car, cargo),
+                    ) for car in cars
+                ]
+                cargo_detail = CargoInfoDetail(
+                    id=cargo.id,
+                    pickup_location=cargo.pickup_location,
+                    delivery_location=cargo.delivery_location,
+                    weight=cargo.weight,
+                    description=cargo.description,
+                    cars_info=cars_info,
+                )
+                await self.cache.set(cache_key, cargo_detail)
+            except NoResultFound:
+                raise HTTPException(
+                    status_code=HTTPStatus.NOT_FOUND,
+                    detail=MSG_CARGO_NOT_FOUND,
+                )
+        return cargo_detail
 
     async def create(self, data: CargoCreate) -> CargoInfo:
         """Creates new cargo."""
         try:
             cargo = await self.cargo_crud.create(data=data)
-            # await self.cache.clear('all')
+            await self.cache.clear('cargo-all')
             return cargo
         except IntegrityError as e:
             if 'ForeignKeyViolationError' in str(e.orig):
@@ -93,6 +104,8 @@ class CargoService:
         """Update specific cargo."""
         try:
             updated_cargo = await self.cargo_crud.update(cargo_id, data)
+            await self.cache.clear(f'cargo-{cargo_id}')
+            await self.cache.clear('cargo-all')
             return updated_cargo
         except NoResultFound:
             raise HTTPException(
@@ -104,8 +117,8 @@ class CargoService:
         """Delete cargo."""
         try:
             await self.cargo_crud.delete(cargo_id)
-            # await self.cache.clear(f'user-{user_id}')
-            # await self.cache.clear('all')
+            await self.cache.clear(f'cargo-{cargo_id}')
+            await self.cache.clear('cargo-all')
         except NoResultFound:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND,
@@ -138,9 +151,12 @@ class CargoService:
             )
 
 
-def get_cargo_service(session: AsyncSession = Depends(get_session)):
+def get_cargo_service(
+        session: AsyncSession = Depends(get_session),
+        cache: AbstractCache = Depends(get_redis_cache),
+):
     """Returns `CargoService` instance."""
     cargo_crud = CargoCRUD(session)
     car_crud = CarCRUD(session)
     location_crud = LocationCRUD(session)
-    return CargoService(cargo_crud, car_crud, location_crud)
+    return CargoService(cargo_crud, car_crud, location_crud, cache)
