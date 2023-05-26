@@ -22,8 +22,9 @@ Made with:
 
 ### Install:
 1. Clone repository: https://github.com/sergkim13/cargo-cars-API
-2. Type `make compose` for running application in docker container. App will be running at http://0.0.0.0:8000. Type `make stop` to stop app container.
-3. Type `make compose-test` for running tests in docker container. Type `make stop-test` to stop app container.
-4. For checking `pre-commit hooks` you need `Poetry` and install dependencies:
+2. Create `.env` and fill it up according to `.env.example`.
+3. Type `make compose` for running application in docker container. App will be running at http://0.0.0.0:8000. Type `make stop` to stop app container.
+4. Type `make compose-test` for running tests in docker container. Type `make stop-test` to stop app container.
+5. For checking `pre-commit hooks` you need `Poetry` and install dependencies:
     - `make install` to install dependencies to your virtual environment.
     - `make hooks`
