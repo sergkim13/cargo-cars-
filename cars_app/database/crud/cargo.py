@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cars_app.database.models import Cargo
@@ -33,11 +33,16 @@ class CargoCRUD:
 
     async def create(self, data: CargoCreate) -> Cargo:
         """Create new cargo."""
-        cargo = Cargo(**data.dict())
-        self.session.add(cargo)
+        stmt = insert(Cargo).values(**data.dict()).returning(
+            Cargo.id,
+            Cargo.delivery_location,
+            Cargo.pickup_location,
+            Cargo.weight,
+            Cargo.description,
+        )
+        result = await self.session.execute(stmt)
         await self.session.commit()
-        await self.session.refresh(cargo)
-        return cargo
+        return result.fetchone()
 
     async def update(self, cargo_id: int, data: CargoUpdate) -> Cargo:
         """Update specific cargo."""

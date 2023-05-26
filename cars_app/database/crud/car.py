@@ -1,7 +1,7 @@
-from sqlalchemy import select, update
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from cars_app.database.models import Car, Cargo
+from cars_app.database.models import Car
 from cars_app.validation.schemas import CarCreate, CarUpdate
 
 
@@ -12,7 +12,7 @@ class CarCRUD:
         """Init `CarCRUD` instance with given session."""
         self.session = session
 
-    async def read_all(self) -> list[Cargo]:
+    async def read_all(self) -> list[Car]:
         query = select(Car)
         result = await self.session.execute(query)
         return result.scalars().all()
@@ -24,19 +24,27 @@ class CarCRUD:
 
     async def create(self, data: CarCreate) -> Car:
         """Create car."""
-        car = Car(**data.dict())
-        self.session.add(car)
+        stmt = insert(Car).values(**data.dict()).returning(
+            Car.id,
+            Car.number_plate,
+            Car.current_location,
+        )
+        result = await self.session.execute(stmt)
         await self.session.commit()
-        await self.session.refresh(car)
-        return car
+        return result.fetchone()
 
     async def update(self, car_id: int, data: CarUpdate) -> Car:
         """Update specific car."""
         values = data.dict(exclude_unset=True)
-        stmt = update(Car).where(Car.id == car_id).values(**values).returning(Car)
+        stmt = update(Car).where(Car.id == car_id).values(**values).returning(
+            Car.id,
+            Car.number_plate,
+            Car.current_location,
+            Car.capacity,
+        )
         result = await self.session.execute(stmt)
         await self.session.commit()
-        return result.scalar_one()
+        return result.fetchone()
 
     async def get_car_location_coordinates(self, car: Car) -> tuple[float]:
         """Returns car's current locations coordinates."""

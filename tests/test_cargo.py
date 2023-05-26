@@ -58,7 +58,7 @@ async def test_get_list(client, fixture_cargo_1, fixture_cargo_2, fixture_cargo_
 @pytest.mark.asyncio
 async def test_get_detail(client, fixture_cargo_1, fixture_car_1, fixture_car_2, fixture_car_3):
     """Checks normal response of `cargo_detail` endpoint."""
-    response = await client.get(CARGO_DETAIL_FULL.format(cargo_id=4))
+    response = await client.get(CARGO_DETAIL_FULL.format(cargo_id=fixture_cargo_1.id))
     assert response.status_code == HTTPStatus.OK
     assert CargoInfoDetail.validate(response.json())
     assert response.json() == CargoInfoDetail(
