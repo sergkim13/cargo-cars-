@@ -13,16 +13,19 @@ class LocationCRUD:
         self.session = session
 
     async def read_all(self) -> list[Location]:
+        """Read all locations."""
         query = select(Location)
         result = await self.session.execute(query)
         return result.scalars().all()
 
     async def read(self, location_zip: int) -> Location:
+        """Read specific location."""
         query = select(Location).where(Location.zip_code == location_zip)
         result = await self.session.execute(query)
         return result.scalar()
 
     async def read_first(self) -> Location | None:
+        """Read first location."""
         query = select(Location)
         result = await self.session.execute(query)
         return result.first()

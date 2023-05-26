@@ -22,11 +22,13 @@ class HelperService:
             car_crud: CarCRUD,
             cache: AbstractCache
     ) -> None:
+        """Inits `HelperService` instance."""
         self.location_crud = location_crud
         self.car_crud = car_crud
         self.cache = cache
 
     async def populate_locations(self):
+        """Populates database with locations."""
         if not await self._is_populated_with_locations():
             locations_list = await self._read_locations_from_source()
             for location in locations_list:
@@ -41,6 +43,7 @@ class HelperService:
         logger.info('Локации загружены в БД.')
 
     async def populate_cars(self):
+        """Populates database with cars."""
         if not await self._is_populated_with_cars():
             cars_list = await self._generate_cars()
             for car in cars_list:
@@ -61,6 +64,7 @@ class HelperService:
         logger.info('Локации машин обновлены.')
 
     async def _read_locations_from_source(self):
+        """Read locations data from 'uszips.csv' file."""
         locations_list = []
         async with aiofiles.open('uszips.csv', mode='r', encoding='utf-8', newline='') as file:
             async for row in AsyncDictReader(file, quoting=csv.QUOTE_ALL):
@@ -68,6 +72,7 @@ class HelperService:
         return locations_list
 
     async def _generate_cars(self):
+        """Generate cars data."""
         cars = []
         number_plates = self._get_number_plates()
         zips = await self._get_location_zips()
@@ -81,6 +86,7 @@ class HelperService:
         return cars
 
     def _get_number_plates(self) -> list:
+        """Genrate car number plates."""
         number_plates: set[str] = set()
         while len(number_plates) < 20:
             number = random.randint(1000, 9999)
@@ -89,6 +95,7 @@ class HelperService:
         return list(number_plates)
 
     async def _get_location_zips(self) -> list:
+        """Get list of locations zip codes."""
         zips: list[int] = []
         locations_list = await self._read_locations_from_source()
         while len(zips) < 20:
@@ -97,13 +104,16 @@ class HelperService:
         return zips
 
     async def _is_populated_with_locations(self) -> Location | None:
+        """Checks if database is populated with locations."""
         return await self.location_crud.read_first()
 
     async def _is_populated_with_cars(self) -> Car | None:
+        """Checks if database is populated with cars."""
         return await self.car_crud.read_first()
 
 
 def get_helper_service(session: AsyncSession):
+    """Returns `HelperService` instance."""
     location_crud = LocationCRUD(session)
     car_crud = CarCRUD(session)
     cache = get_redis_cache()

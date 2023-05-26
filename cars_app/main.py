@@ -20,6 +20,7 @@ app.include_router(car_router)
 
 
 async def populate_db():
+    """Populates database with locaitions and cars."""
     async with async_session() as session:
         helper_service = get_helper_service(session)
         await helper_service.populate_locations()
@@ -27,6 +28,7 @@ async def populate_db():
 
 
 async def update_cars_locations_random():
+    """Updats car's locations every 'INTERVAL_SECONDS' seconds."""
     while True:
         await asyncio.sleep(INTERVAL_SECONDS)
         async with async_session() as session:

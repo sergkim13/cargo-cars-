@@ -13,11 +13,13 @@ class CarCRUD:
         self.session = session
 
     async def read_all(self) -> list[Car]:
+        """Read all cars."""
         query = select(Car)
         result = await self.session.execute(query)
         return result.scalars().all()
 
     async def read_first(self) -> Car | None:
+        """Read first car."""
         query = select(Car)
         result = await self.session.execute(query)
         return result.first()
