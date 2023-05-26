@@ -33,7 +33,7 @@ jobs:
     - uses: actions/checkout@v3
     - run: pip install -r requirements.txt
     - name: test & publish code coverage
-      uses: paambaati/codeclimate-action@v2.7.4
+      uses: paambaati/codeclimate-action@v4.0.0
       env:
         REDIS_HOST: redis
         REDIS_DB: 1
