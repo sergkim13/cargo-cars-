@@ -6,7 +6,7 @@ load_dotenv()
 
 # Security
 SECRET_KEY = os.environ.get('SECRET_KEY')
-INTERVAL_SECONDS = int(os.environ.get('INTERVAL_SECONDS'))  # type: ignore
+INTERVAL_SECONDS = 180
 
 # Database
 DB_HOST = os.environ.get('DB_HOST')
