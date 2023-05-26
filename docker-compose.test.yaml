@@ -10,7 +10,6 @@ services:
       REDIS_DB: 1
       DB_HOST: 'test_app_db'
       DB_NAME: ${TEST_DB_NAME}
-      DEBUG: True
     build:
       context: .
       dockerfile: Dockerfile

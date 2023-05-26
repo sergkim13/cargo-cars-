@@ -12,6 +12,11 @@ class LocationCRUD:
         """Init `LocationCRUD` instance with given session."""
         self.session = session
 
+    async def read_all(self) -> list[Location]:
+        query = select(Location)
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
     async def read(self, location_zip: int) -> Location:
         query = select(Location).where(Location.zip_code == location_zip)
         result = await self.session.execute(query)

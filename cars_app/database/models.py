@@ -18,7 +18,6 @@ class Location(Base):
     car_relation: Mapped[list['Car']] = relationship(
         back_populates='location_relation',
         cascade='all, delete-orphan',
-        lazy='joined',
     )
 
     def __repr__(self) -> str:

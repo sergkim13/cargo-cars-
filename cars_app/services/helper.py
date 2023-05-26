@@ -6,17 +6,25 @@ import aiofiles  # type: ignore
 from aiocsv import AsyncDictReader
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from cars_app.cache.abstract_cache import AbstractCache
+from cars_app.cache.module import get_redis_cache
 from cars_app.database.crud.car import CarCRUD
 from cars_app.database.crud.location import LocationCRUD
 from cars_app.database.models import Car, Location
 from cars_app.logging.module import logger
-from cars_app.validation.schemas import CarCreate, LocationCreate
+from cars_app.validation.schemas import CarCreate, CarUpdate, LocationCreate
 
 
 class HelperService:
-    def __init__(self, location_crud: LocationCRUD, car_crud: CarCRUD) -> None:
+    def __init__(
+            self,
+            location_crud: LocationCRUD,
+            car_crud: CarCRUD,
+            cache: AbstractCache
+    ) -> None:
         self.location_crud = location_crud
         self.car_crud = car_crud
+        self.cache = cache
 
     async def populate_locations(self):
         if not await self._is_populated_with_locations():
@@ -38,6 +46,19 @@ class HelperService:
             for car in cars_list:
                 await self.car_crud.create(car)
         logger.info('Машины загружены в БД.')
+
+    async def update_locations_random(self):
+        """Update current locations of all cars randomly."""
+        cars = await self.car_crud.read_all()
+        locations = await self.location_crud.read_all()
+        locations_zips = [location.zip_code for location in locations]
+        for car in cars:
+            avaliable_zips = [
+                zip_code for zip_code in locations_zips if zip_code != car.current_location
+            ]
+            await self.car_crud.update(car.id, CarUpdate(current_location=random.choice(avaliable_zips)))
+        await self.cache.clear('all')
+        logger.info('Локации машин обновлены.')
 
     async def _read_locations_from_source(self):
         locations_list = []
@@ -85,4 +106,5 @@ class HelperService:
 def get_helper_service(session: AsyncSession):
     location_crud = LocationCRUD(session)
     car_crud = CarCRUD(session)
-    return HelperService(location_crud, car_crud)
+    cache = get_redis_cache()
+    return HelperService(location_crud, car_crud, cache)
