@@ -1,0 +1,51 @@
+name: test coverage
+
+on: push
+
+jobs:
+
+  container-job:
+    runs-on: ubuntu-latest
+    container: python:3.10
+    services:
+      postgres:
+        image: postgres:15.1-alpine
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_USER: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:latest
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+
+    steps:
+    - uses: actions/checkout@v3
+    - run: pip install -r requirements.txt
+    - name: test & publish code coverage
+      uses: paambaati/codeclimate-action@v2.7.4
+      env:
+        REDIS_HOST: redis
+        REDIS_DB: 1
+        REDIS_PORT: 6379
+        REDIS_EXP: 100
+        DB_USER: test
+        DB_PASS: test
+        DB_NAME: test
+        TEST_DB_NAME: test
+        DB_PORT: 5432
+        DB_HOST: postgres
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      with:
+        coverageCommand: pytest --cov-report term-missing --cov=cars_app --cov-report xml
