@@ -1,6 +1,6 @@
 import re
 
-from fastapi import Query
+from fastapi import HTTPException, Query
 from pydantic import BaseModel, Field, validator
 
 
@@ -114,6 +114,18 @@ class QueryParams(BaseModel):
 
     @validator('weight_max')
     def validate_weight_max(cls, v, values):
-        if 'weight_min' in values and v < values['weight_min']:
-            raise ValueError('weight_max должен быть больше или равен weight_min')
+        if v < values['weight_min']:
+            raise HTTPException(
+                status_code=422,
+                detail='weight_max должен быть больше или равен weight_min',
+            )
+        return v
+
+    @validator('distance_max')
+    def validate_distance_max(cls, v, values):
+        if v < values['distance_min']:
+            raise HTTPException(
+                status_code=422,
+                detail='distance_max должен быть больше или равен distance_min',
+            )
         return v

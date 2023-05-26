@@ -13,7 +13,6 @@ from cars_app.database.crud.location import LocationCRUD
 from cars_app.database.models import Car, Cargo, Location
 from cars_app.database.settings import get_session
 from cars_app.exceptions.constants import MSG_CARGO_NOT_FOUND, MSG_LOCATION_NOT_FOUND
-from cars_app.services.constants import MAX_DISTANCE_IN_MILES
 from cars_app.validation.schemas import (
     CargoCarsInfo,
     CargoCreate,
@@ -50,7 +49,7 @@ class CargoService:
                     id=cargo.id,
                     pickup_location=cargo.pickup_location,
                     delivery_location=cargo.delivery_location,
-                    nearby_cars_count=await self._count_nearby_cars(cargo),
+                    nearby_cars_count=await self._count_nearby_cars(cargo, query.distance_min, query.distance_max),
                 ) for cargo in cargos
             ]
             await self.cache.set(cache_key, serialized_cargos)
@@ -127,10 +126,14 @@ class CargoService:
                 detail=MSG_CARGO_NOT_FOUND,
             )
 
-    async def _count_nearby_cars(self, cargo: Cargo, max_distance_in_miles: int = MAX_DISTANCE_IN_MILES) -> int:
-        """Returns count of cars in `max_distance_in_miles` from cargo."""
+    async def _count_nearby_cars(self, cargo: Cargo, distance_min: int, distance_max: int) -> int:
+        """Returns count of cars which are between `distance_min` and `distance_max` from cargo."""
         cars = await self.car_crud.read_all()
-        nearby_cars = [car for car in cars if await self._count_distance(car, cargo) <= max_distance_in_miles]
+        nearby_cars = [
+            car for car in cars
+            if await self._count_distance(car, cargo) >= distance_min
+            and await self._count_distance(car, cargo) <= distance_max
+        ]
         return len(nearby_cars)
 
     async def _count_distance(self, car: Car, cargo: Cargo) -> float:
