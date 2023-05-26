@@ -1,7 +1,7 @@
 # Cars API (FastApi)
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/c5b1881834bfb4edd645/maintainability)](https://codeclimate.com/github/sergkim13/cargo-cars-API/maintainability)
-[![Linters check](https://github.com/sergkim13/cargo-cars-API/settings/secrets/actions/workflows/linters_check.yml/badge.svg)](https://github.com/sergkim13/cargo-cars-API/settings/secrets/actions/workflows/linters_check.yml)
+[![Linters check](https://github.com/sergkim13/cargo-cars-API/actions/workflows/linters_check.yml/badge.svg)](https://github.com/sergkim13/cargo-cars-API/actions/workflows/linters_check.yml)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c5b1881834bfb4edd645/test_coverage)](https://codeclimate.com/github/sergkim13/cargo-cars-API/test_coverage)
 
 ### Description:
