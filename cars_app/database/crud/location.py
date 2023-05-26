@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cars_app.database.models import Location
@@ -34,4 +34,11 @@ class LocationCRUD:
         """Create location."""
         location = Location(**data.dict())
         self.session.add(location)
+        await self.session.commit()
+
+    async def create_list(self, data: list[LocationCreate]) -> None:
+        """Creates list of locations."""
+        await self.session.execute(
+            insert(Location), [location.dict() for location in data]
+        )
         await self.session.commit()

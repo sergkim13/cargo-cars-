@@ -32,6 +32,11 @@ class CarUpdate(BaseModel):
     current_location: int
 
 
+class CarUpdateBulk(BaseModel):
+    id: int
+    current_location: int
+
+
 class CarCreate(CarPlate):
     current_location: int
     capacity: int = Field(ge=1, le=1000)

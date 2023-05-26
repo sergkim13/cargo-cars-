@@ -2,7 +2,7 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cars_app.database.models import Car
-from cars_app.validation.schemas import CarCreate, CarUpdate
+from cars_app.validation.schemas import CarCreate, CarUpdate, CarUpdateBulk
 
 
 class CarCRUD:
@@ -35,6 +35,13 @@ class CarCRUD:
         await self.session.commit()
         return result.fetchone()
 
+    async def create_list(self, data: list[CarCreate]) -> None:
+        """Create list of cars."""
+        await self.session.execute(
+            insert(Car), [car.dict() for car in data]
+        )
+        await self.session.commit()
+
     async def update(self, car_id: int, data: CarUpdate) -> Car:
         """Update specific car."""
         values = data.dict(exclude_unset=True)
@@ -47,6 +54,13 @@ class CarCRUD:
         result = await self.session.execute(stmt)
         await self.session.commit()
         return result.fetchone()
+
+    async def update_list(self, data: list[CarUpdateBulk]) -> None:
+        """Updates list of cars."""
+        await self.session.execute(
+            update(Car), [car.dict() for car in data]
+        )
+        await self.session.commit()
 
     async def get_car_location_coordinates(self, car: Car) -> tuple[float]:
         """Returns car's current locations coordinates."""

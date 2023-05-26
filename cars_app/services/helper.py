@@ -12,7 +12,7 @@ from cars_app.database.crud.car import CarCRUD
 from cars_app.database.crud.location import LocationCRUD
 from cars_app.database.models import Car, Location
 from cars_app.logging.module import logger
-from cars_app.validation.schemas import CarCreate, CarUpdate, LocationCreate
+from cars_app.validation.schemas import CarCreate, CarUpdateBulk, LocationCreate
 
 
 class HelperService:
@@ -27,31 +27,32 @@ class HelperService:
         self.car_crud = car_crud
         self.cache = cache
 
-    async def populate_locations(self):
+    async def populate_locations(self) -> None:
         """Populates database with locations."""
         if not await self._is_populated_with_locations():
-            locations_list = await self._read_locations_from_source()
-            for location in locations_list:
-                location_data = LocationCreate(
+            locations_data = await self._read_locations_from_source()
+            locations_list = [
+                LocationCreate(
                     city=location['city'],
                     state=location['state_name'],
                     zip_code=int(location['zip']),
                     latitude=float(location['lat']),
                     longtitude=float(location['lng']),
-                )
-                await self.location_crud.create(location_data)
+                ) for location in locations_data
+            ]
+            await self.location_crud.create_list(locations_list)
         logger.info('Локации загружены в БД.')
 
-    async def populate_cars(self):
+    async def populate_cars(self) -> None:
         """Populates database with cars."""
         if not await self._is_populated_with_cars():
             cars_list = await self._generate_cars()
-            for car in cars_list:
-                await self.car_crud.create(car)
+            await self.car_crud.create_list(cars_list)
         logger.info('Машины загружены в БД.')
 
-    async def update_locations_random(self):
+    async def update_locations_random(self) -> None:
         """Update current locations of all cars randomly."""
+        cars_update_list = []
         cars = await self.car_crud.read_all()
         locations = await self.location_crud.read_all()
         locations_zips = [location.zip_code for location in locations]
@@ -59,19 +60,22 @@ class HelperService:
             avaliable_zips = [
                 zip_code for zip_code in locations_zips if zip_code != car.current_location
             ]
-            await self.car_crud.update(car.id, CarUpdate(current_location=random.choice(avaliable_zips)))
+            cars_update_list.append(CarUpdateBulk(
+                id=car.id, current_location=random.choice(avaliable_zips))
+            )
+        await self.car_crud.update_list(cars_update_list)
         await self.cache.clear('all')
         logger.info('Локации машин обновлены.')
 
-    async def _read_locations_from_source(self):
+    async def _read_locations_from_source(self) -> list:
         """Read locations data from 'uszips.csv' file."""
-        locations_list = []
+        locations_data = []
         async with aiofiles.open('uszips.csv', mode='r', encoding='utf-8', newline='') as file:
             async for row in AsyncDictReader(file, quoting=csv.QUOTE_ALL):
-                locations_list.append(row)
-        return locations_list
+                locations_data.append(row)
+        return locations_data
 
-    async def _generate_cars(self):
+    async def _generate_cars(self) -> list[CarCreate]:
         """Generate cars data."""
         cars = []
         number_plates = self._get_number_plates()
